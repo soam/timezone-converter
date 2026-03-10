@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Timezone Bridge · Meeting Time Assistant</title>
+  <title>Timezone Converter</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,102 @@ var _React = React,
   useState = _React.useState,
   useRef = _React.useRef,
   useEffect = _React.useEffect;
-var TIMEZONES = [{label:"UTC−12 (Baker Island)",value:-12},{label:"UTC−11 (Samoa)",value:-11},{label:"UTC−10 (Hawaii)",value:-10},{label:"UTC−9 (Alaska)",value:-9,dst:true},{label:"UTC−8 (Los Angeles / Vancouver)",value:-8,dst:true},{label:"UTC−7 (Denver / Phoenix)",value:-7,dst:true},{label:"UTC−6 (Chicago / Mexico City)",value:-6,dst:true},{label:"UTC−5 (New York / Toronto)",value:-5,dst:true},{label:"UTC−4 (Halifax / Caracas)",value:-4,dst:true},{label:"UTC−3 (São Paulo / Buenos Aires)",value:-3,dst:true},{label:"UTC−2 (South Georgia)",value:-2},{label:"UTC−1 (Azores)",value:-1,dst:true},{label:"UTC+0 (London / Lisbon)",value:0,dst:true},{label:"UTC+1 (Paris / Berlin / Rome)",value:1,dst:true},{label:"UTC+2 (Cairo / Johannesburg)",value:2,dst:true},{label:"UTC+3 (Moscow / Nairobi)",value:3},{label:"UTC+4 (Dubai / Baku)",value:4},{label:"UTC+5 (Karachi / Tashkent)",value:5},{label:"UTC+5:30 (Mumbai / New Delhi)",value:5.5},{label:"UTC+6 (Dhaka / Almaty)",value:6},{label:"UTC+7 (Bangkok / Jakarta)",value:7},{label:"UTC+8 (Beijing / Singapore / Perth)",value:8},{label:"UTC+9 (Tokyo / Seoul)",value:9},{label:"UTC+9:30 (Adelaide)",value:9.5,dst:true},{label:"UTC+10 (Sydney / Melbourne)",value:10,dst:true},{label:"UTC+11 (Solomon Islands)",value:11},{label:"UTC+12 (Auckland / Fiji)",value:12,dst:true}];
+var TIMEZONES = [{
+  label: "UTC−12 (Baker Island)",
+  value: -12
+}, {
+  label: "UTC−11 (Samoa)",
+  value: -11
+}, {
+  label: "UTC−10 (Hawaii)",
+  value: -10
+}, {
+  label: "UTC−9 (Alaska)",
+  value: -9,
+  dst: true
+}, {
+  label: "UTC−8 (Los Angeles / Vancouver)",
+  value: -8,
+  dst: true
+}, {
+  label: "UTC−7 (Denver / Phoenix)",
+  value: -7,
+  dst: true
+}, {
+  label: "UTC−6 (Chicago / Mexico City)",
+  value: -6,
+  dst: true
+}, {
+  label: "UTC−5 (New York / Toronto)",
+  value: -5,
+  dst: true
+}, {
+  label: "UTC−4 (Halifax / Caracas)",
+  value: -4,
+  dst: true
+}, {
+  label: "UTC−3 (São Paulo / Buenos Aires)",
+  value: -3,
+  dst: true
+}, {
+  label: "UTC−2 (South Georgia)",
+  value: -2
+}, {
+  label: "UTC−1 (Azores)",
+  value: -1,
+  dst: true
+}, {
+  label: "UTC+0 (London / Lisbon)",
+  value: 0,
+  dst: true
+}, {
+  label: "UTC+1 (Paris / Berlin / Rome)",
+  value: 1,
+  dst: true
+}, {
+  label: "UTC+2 (Cairo / Johannesburg)",
+  value: 2,
+  dst: true
+}, {
+  label: "UTC+3 (Moscow / Nairobi)",
+  value: 3
+}, {
+  label: "UTC+4 (Dubai / Baku)",
+  value: 4
+}, {
+  label: "UTC+5 (Karachi / Tashkent)",
+  value: 5
+}, {
+  label: "UTC+5:30 (Mumbai / New Delhi)",
+  value: 5.5
+}, {
+  label: "UTC+6 (Dhaka / Almaty)",
+  value: 6
+}, {
+  label: "UTC+7 (Bangkok / Jakarta)",
+  value: 7
+}, {
+  label: "UTC+8 (Beijing / Singapore / Perth)",
+  value: 8
+}, {
+  label: "UTC+9 (Tokyo / Seoul)",
+  value: 9
+}, {
+  label: "UTC+9:30 (Adelaide)",
+  value: 9.5,
+  dst: true
+}, {
+  label: "UTC+10 (Sydney / Melbourne)",
+  value: 10,
+  dst: true
+}, {
+  label: "UTC+11 (Solomon Islands)",
+  value: 11
+}, {
+  label: "UTC+12 (Auckland / Fiji)",
+  value: 12,
+  dst: true
+}];
 function fmt(minutes) {
   var total = (minutes % 1440 + 1440) % 1440;
   var h = Math.floor(total / 60);
@@ -69,7 +164,10 @@ function fmt(minutes) {
   return "".concat(h12, ":").concat(String(m).padStart(2, "0"), " ").concat(ampm);
 }
 function timeToMinutes(timeStr) {
-  var _timeStr$split$map = timeStr.split(":").map(Number), _timeStr$split$map2 = _slicedToArray(_timeStr$split$map, 2), h = _timeStr$split$map2[0], m = _timeStr$split$map2[1];
+  var _timeStr$split$map = timeStr.split(":").map(Number),
+    _timeStr$split$map2 = _slicedToArray(_timeStr$split$map, 2),
+    h = _timeStr$split$map2[0],
+    m = _timeStr$split$map2[1];
   return h * 60 + m;
 }
 function getDayLabel(minutes) {
@@ -82,62 +180,142 @@ function minutesToTimeStr(min) {
   return "".concat(String(Math.floor(m / 60)).padStart(2, '0'), ":").concat(String(m % 60).padStart(2, '0'));
 }
 function BarInner(_ref) {
-  var startMin = _ref.startMin, endMin = _ref.endMin, accent = _ref.accent;
-  var pct = function pct(m) { return (m % 1440 + 1440) % 1440 / 1440 * 100; };
-  var s = pct(startMin), e = pct(endMin);
-  var spans = e >= s ? [{left:s,width:e-s}] : [{left:s,width:100-s},{left:0,width:e}];
-  return React.createElement(React.Fragment, null,
-    _toConsumableArray(Array(24)).map(function(_, i) {
-      return React.createElement("div", {key:i, style:{position:"absolute",left:"".concat(i/24*100,"%"),top:0,bottom:0,width:1,background:i%6===0?"#333":"#222"}});
-    }),
-    spans.map(function(sp, i) {
-      return React.createElement("div", {key:i, style:{position:"absolute",left:"".concat(sp.left,"%"),width:"".concat(sp.width,"%"),top:4,bottom:4,background:accent,borderRadius:2,opacity:0.85}});
-    })
-  );
+  var startMin = _ref.startMin,
+    endMin = _ref.endMin,
+    accent = _ref.accent;
+  var pct = function pct(m) {
+    return (m % 1440 + 1440) % 1440 / 1440 * 100;
+  };
+  var s = pct(startMin);
+  var e = pct(endMin);
+  var spans = e >= s ? [{
+    left: s,
+    width: e - s
+  }] : [{
+    left: s,
+    width: 100 - s
+  }, {
+    left: 0,
+    width: e
+  }];
+  return /*#__PURE__*/React.createElement(React.Fragment, null, _toConsumableArray(Array(24)).map(function (_, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        position: "absolute",
+        left: "".concat(i / 24 * 100, "%"),
+        top: 0,
+        bottom: 0,
+        width: 1,
+        background: i % 6 === 0 ? "#333" : "#222"
+      }
+    });
+  }), spans.map(function (sp, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        position: "absolute",
+        left: "".concat(sp.left, "%"),
+        width: "".concat(sp.width, "%"),
+        top: 4,
+        bottom: 4,
+        background: accent,
+        borderRadius: 2,
+        opacity: 0.85
+      }
+    });
+  }));
 }
 function BarTicks() {
-  return React.createElement("div", {style:{display:"flex",justifyContent:"space-between",marginTop:3}},
-    ["12a","6a","12p","6p","12a"].map(function(t,i) {
-      return React.createElement("span", {key:i, style:{fontSize:9,color:"#555",fontFamily:"'DM Mono', monospace",letterSpacing:1}}, t);
-    })
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 3
+    }
+  }, ["12a", "6a", "12p", "6p", "12a"].map(function (t, i) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: i,
+      style: {
+        fontSize: 9,
+        color: "#555",
+        fontFamily: "'DM Mono', monospace",
+        letterSpacing: 1
+      }
+    }, t);
+  }));
 }
 function TimeBar(_ref2) {
-  var startMin = _ref2.startMin, endMin = _ref2.endMin, label = _ref2.label, accent = _ref2.accent;
-  return React.createElement("div", {style:{marginBottom:8}},
-    React.createElement("div", {style:{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#888",marginBottom:6,fontFamily:"'DM Mono', monospace"}}, label),
-    React.createElement("div", {style:{position:"relative",height:28,background:"#1a1a1a",borderRadius:4,overflow:"hidden",border:"1px solid #2a2a2a"}},
-      React.createElement(BarInner, {startMin:startMin,endMin:endMin,accent:accent})
-    ),
-    React.createElement(BarTicks, null)
-  );
+  var startMin = _ref2.startMin,
+    endMin = _ref2.endMin,
+    label = _ref2.label,
+    accent = _ref2.accent;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: "#888",
+      marginBottom: 6,
+      fontFamily: "'DM Mono', monospace"
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      height: 28,
+      background: "#1a1a1a",
+      borderRadius: 4,
+      overflow: "hidden",
+      border: "1px solid #2a2a2a"
+    }
+  }, /*#__PURE__*/React.createElement(BarInner, {
+    startMin: startMin,
+    endMin: endMin,
+    accent: accent
+  })), /*#__PURE__*/React.createElement(BarTicks, null));
 }
 function DraggableTimeBar(_ref3) {
-  var startMin = _ref3.startMin, endMin = _ref3.endMin, onStartChange = _ref3.onStartChange, onEndChange = _ref3.onEndChange, label = _ref3.label, accent = _ref3.accent;
+  var startMin = _ref3.startMin,
+    endMin = _ref3.endMin,
+    onStartChange = _ref3.onStartChange,
+    onEndChange = _ref3.onEndChange,
+    label = _ref3.label,
+    accent = _ref3.accent;
   var barRef = useRef(null);
   var dragging = useRef(null);
-  var _useState = useState(null), _useState2 = _slicedToArray(_useState, 2), activeTooltip = _useState2[0], setActiveTooltip = _useState2[1];
-  var pct = function pct(m) { return (m % 1440 + 1440) % 1440 / 1440 * 100; };
-  var s = pct(startMin), e = pct(endMin);
+  var _useState = useState(null),
+    _useState2 = _slicedToArray(_useState, 2),
+    activeTooltip = _useState2[0],
+    setActiveTooltip = _useState2[1];
+  var pct = function pct(m) {
+    return (m % 1440 + 1440) % 1440 / 1440 * 100;
+  };
+  var s = pct(startMin);
+  var e = pct(endMin);
   var getMinutes = function getMinutes(clientX) {
     var rect = barRef.current.getBoundingClientRect();
     var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     return Math.round(ratio * 1440 / 15) * 15;
   };
-  var startDrag = function startDrag(side) { return function(ev) {
-    ev.preventDefault();
-    dragging.current = side;
-    setActiveTooltip(side);
-    document.body.style.cursor = "ew-resize";
-    document.body.style.userSelect = "none";
-  }; };
-  useEffect(function() {
+  var startDrag = function startDrag(side) {
+    return function (ev) {
+      ev.preventDefault();
+      dragging.current = side;
+      setActiveTooltip(side);
+      document.body.style.cursor = "ew-resize";
+      document.body.style.userSelect = "none";
+    };
+  };
+  useEffect(function () {
     var onMove = function onMove(ev) {
       if (!dragging.current) return;
       var clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
       var mins = getMinutes(clientX);
-      if (dragging.current === 'start') onStartChange(minutesToTimeStr(mins));
-      else onEndChange(minutesToTimeStr(mins));
+      if (dragging.current === 'start') onStartChange(minutesToTimeStr(mins));else onEndChange(minutesToTimeStr(mins));
     };
     var onUp = function onUp() {
       if (!dragging.current) return;
@@ -148,9 +326,11 @@ function DraggableTimeBar(_ref3) {
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchmove', onMove, {passive:true});
+    window.addEventListener('touchmove', onMove, {
+      passive: true
+    });
     window.addEventListener('touchend', onUp);
-    return function() {
+    return function () {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
       window.removeEventListener('touchmove', onMove);
@@ -158,59 +338,242 @@ function DraggableTimeBar(_ref3) {
     };
   }, [onStartChange, onEndChange]);
   var Handle = function Handle(_ref4) {
-    var side = _ref4.side, pctPos = _ref4.pctPos, minutes = _ref4.minutes;
-    return React.createElement("div", {
-      onMouseDown: startDrag(side), onTouchStart: startDrag(side),
-      style:{position:"absolute",left:"".concat(pctPos,"%"),top:"50%",transform:"translate(-50%, -50%)",width:20,height:38,cursor:"ew-resize",zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}
-    },
-      React.createElement("div", {style:{width:7,height:22,background:accent,borderRadius:4,border:"2px solid #0e0e0e",boxShadow:"0 0 0 1px ".concat(accent,"55, 0 2px 8px ").concat(accent,"44"),display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2}},
-        React.createElement("div", {style:{width:2,height:2,borderRadius:"50%",background:"#0e0e0e",opacity:0.6}}),
-        React.createElement("div", {style:{width:2,height:2,borderRadius:"50%",background:"#0e0e0e",opacity:0.6}}),
-        React.createElement("div", {style:{width:2,height:2,borderRadius:"50%",background:"#0e0e0e",opacity:0.6}})
-      ),
-      activeTooltip === side && React.createElement("div", {
-        style:{position:"absolute",bottom:"calc(100% + 7px)",left:"50%",transform:"translateX(-50%)",background:"#1c1c1c",border:"1px solid ".concat(accent),color:accent,fontFamily:"'DM Mono', monospace",fontSize:11,fontWeight:500,padding:"4px 9px",borderRadius:4,whiteSpace:"nowrap",pointerEvents:"none",boxShadow:"0 4px 12px #00000088",letterSpacing:0.5}
-      },
-        fmt(minutes),
-        React.createElement("div", {style:{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid ".concat(accent)}})
-      )
-    );
+    var side = _ref4.side,
+      pctPos = _ref4.pctPos,
+      minutes = _ref4.minutes;
+    return /*#__PURE__*/React.createElement("div", {
+      onMouseDown: startDrag(side),
+      onTouchStart: startDrag(side),
+      style: {
+        position: "absolute",
+        left: "".concat(pctPos, "%"),
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 20,
+        height: 38,
+        cursor: "ew-resize",
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 7,
+        height: 22,
+        background: accent,
+        borderRadius: 4,
+        border: "2px solid #0e0e0e",
+        boxShadow: "0 0 0 1px ".concat(accent, "55, 0 2px 8px ").concat(accent, "44"),
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 2,
+        height: 2,
+        borderRadius: "50%",
+        background: "#0e0e0e",
+        opacity: 0.6
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 2,
+        height: 2,
+        borderRadius: "50%",
+        background: "#0e0e0e",
+        opacity: 0.6
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 2,
+        height: 2,
+        borderRadius: "50%",
+        background: "#0e0e0e",
+        opacity: 0.6
+      }
+    })), activeTooltip === side && /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        bottom: "calc(100% + 7px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "#1c1c1c",
+        border: "1px solid ".concat(accent),
+        color: accent,
+        fontFamily: "'DM Mono', monospace",
+        fontSize: 11,
+        fontWeight: 500,
+        padding: "4px 9px",
+        borderRadius: 4,
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+        boxShadow: "0 4px 12px #00000088",
+        letterSpacing: 0.5
+      }
+    }, fmt(minutes), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        top: "100%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: 0,
+        height: 0,
+        borderLeft: "5px solid transparent",
+        borderRight: "5px solid transparent",
+        borderTop: "5px solid ".concat(accent)
+      }
+    })));
   };
-  return React.createElement("div", {style:{marginBottom:8}},
-    React.createElement("div", {style:{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#888",marginBottom:6,fontFamily:"'DM Mono', monospace"}}, label),
-    React.createElement("div", {style:{position:"relative",paddingTop:6}},
-      React.createElement("div", {ref:barRef, style:{position:"relative",height:28,background:"#1a1a1a",borderRadius:4,border:"1px solid #2a2a2a",overflow:"hidden"}},
-        React.createElement(BarInner, {startMin:startMin,endMin:endMin,accent:accent})
-      ),
-      React.createElement(Handle, {side:"start",pctPos:s,minutes:startMin}),
-      React.createElement(Handle, {side:"end",pctPos:e,minutes:endMin})
-    ),
-    React.createElement(BarTicks, null)
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: "#888",
+      marginBottom: 6,
+      fontFamily: "'DM Mono', monospace"
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      paddingTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    ref: barRef,
+    style: {
+      position: "relative",
+      height: 28,
+      background: "#1a1a1a",
+      borderRadius: 4,
+      border: "1px solid #2a2a2a",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement(BarInner, {
+    startMin: startMin,
+    endMin: endMin,
+    accent: accent
+  })), /*#__PURE__*/React.createElement(Handle, {
+    side: "start",
+    pctPos: s,
+    minutes: startMin
+  }), /*#__PURE__*/React.createElement(Handle, {
+    side: "end",
+    pctPos: e,
+    minutes: endMin
+  })), /*#__PURE__*/React.createElement(BarTicks, null));
 }
 function DSTToggle(_ref5) {
-  var enabled = _ref5.enabled, onChange = _ref5.onChange, accent = _ref5.accent;
-  return React.createElement("div", {
-    onClick: function onClick() { return onChange(!enabled); },
-    style:{display:"inline-flex",alignItems:"center",gap:8,cursor:"pointer",userSelect:"none",marginTop:12}
-  },
-    React.createElement("div", {style:{position:"relative",width:36,height:20,borderRadius:10,background:enabled?accent:"#2a2a2a",border:"1px solid ".concat(enabled?accent:"#3a3a3a"),transition:"background 0.2s, border-color 0.2s",flexShrink:0}},
-      React.createElement("div", {style:{position:"absolute",top:2,left:enabled?17:2,width:14,height:14,borderRadius:"50%",background:enabled?"#0e0e0e":"#555",transition:"left 0.18s, background 0.2s",boxShadow:enabled?"0 0 4px ".concat(accent,"88"):"none"}})
-    ),
-    React.createElement("span", {style:{fontFamily:"'DM Mono', monospace",fontSize:11,letterSpacing:1.5,textTransform:"uppercase",color:enabled?accent:"#555",transition:"color 0.2s"}},
-      "DST ", enabled ? "on · Summer" : "off · Winter"
-    )
-  );
+  var enabled = _ref5.enabled,
+    onChange = _ref5.onChange,
+    accent = _ref5.accent;
+  return /*#__PURE__*/React.createElement("div", {
+    onClick: function onClick() {
+      return onChange(!enabled);
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 8,
+      cursor: "pointer",
+      userSelect: "none",
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      width: 36,
+      height: 20,
+      borderRadius: 10,
+      background: enabled ? accent : "#2a2a2a",
+      border: "1px solid ".concat(enabled ? accent : "#3a3a3a"),
+      transition: "background 0.2s, border-color 0.2s",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 2,
+      left: enabled ? 17 : 2,
+      width: 14,
+      height: 14,
+      borderRadius: "50%",
+      background: enabled ? "#0e0e0e" : "#555",
+      transition: "left 0.18s, background 0.2s",
+      boxShadow: enabled ? "0 0 4px ".concat(accent, "88") : "none"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 11,
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+      color: enabled ? accent : "#555",
+      transition: "color 0.2s"
+    }
+  }, "DST ", enabled ? "on · Summer" : "off · Winter"));
+}
+function getParams() {
+  var p = new URLSearchParams(window.location.search);
+  var myTz = p.has('me') ? Number(p.get('me')) : -5;
+  var theirTz = p.has('them') ? Number(p.get('them')) : 1;
+  var myDst = p.get('medst') === '1';
+  var theirDst = p.get('themdst') === '1';
+  if (!TIMEZONES.find(function(t){return t.value===myTz;})) myTz = -5;
+  if (!TIMEZONES.find(function(t){return t.value===theirTz;})) theirTz = 1;
+  return { myTz: myTz, theirTz: theirTz, myDst: myDst, theirDst: theirDst };
+}
+function setParams(myTz, theirTz, myDst, theirDst) {
+  var p = new URLSearchParams();
+  p.set('me', myTz);
+  p.set('them', theirTz);
+  if (myDst) p.set('medst', '1');
+  if (theirDst) p.set('themdst', '1');
+  var newUrl = window.location.pathname + '?' + p.toString();
+  window.history.replaceState(null, '', newUrl);
 }
 function App() {
-  var _useState3 = useState(-5), _useState4 = _slicedToArray(_useState3, 2), myTz = _useState4[0], setMyTz = _useState4[1];
-  var _useState5 = useState(1), _useState6 = _slicedToArray(_useState5, 2), theirTz = _useState6[0], setTheirTz = _useState6[1];
-  var _useState7 = useState("09:00"), _useState8 = _slicedToArray(_useState7, 2), startTime = _useState8[0], setStartTime = _useState8[1];
-  var _useState9 = useState("17:00"), _useState10 = _slicedToArray(_useState9, 2), endTime = _useState10[0], setEndTime = _useState10[1];
-  var _useState11 = useState(false), _useState12 = _slicedToArray(_useState11, 2), myDst = _useState12[0], setMyDst = _useState12[1];
-  var _useState13 = useState(false), _useState14 = _slicedToArray(_useState13, 2), theirDst = _useState14[0], setTheirDst = _useState14[1];
-  var myTzObj = TIMEZONES.find(function(t) { return t.value === myTz; });
-  var theirTzObj = TIMEZONES.find(function(t) { return t.value === theirTz; });
+  var init = getParams();
+  var _useState3 = useState(init.myTz),
+    _useState4 = _slicedToArray(_useState3, 2),
+    myTz = _useState4[0],
+    setMyTz = _useState4[1];
+  var _useState5 = useState(init.theirTz),
+    _useState6 = _slicedToArray(_useState5, 2),
+    theirTz = _useState6[0],
+    setTheirTz = _useState6[1];
+  var _useState7 = useState("09:00"),
+    _useState8 = _slicedToArray(_useState7, 2),
+    startTime = _useState8[0],
+    setStartTime = _useState8[1];
+  var _useState9 = useState("17:00"),
+    _useState0 = _slicedToArray(_useState9, 2),
+    endTime = _useState0[0],
+    setEndTime = _useState0[1];
+  var _useState1 = useState(init.myDst),
+    _useState10 = _slicedToArray(_useState1, 2),
+    myDst = _useState10[0],
+    setMyDst = _useState10[1];
+  var _useState11 = useState(init.theirDst),
+    _useState12 = _slicedToArray(_useState11, 2),
+    theirDst = _useState12[0],
+    setTheirDst = _useState12[1];
+  useEffect(function() {
+    setParams(myTz, theirTz, myDst, theirDst);
+  }, [myTz, theirTz, myDst, theirDst]);
+  var myTzObj = TIMEZONES.find(function (t) {
+    return t.value === myTz;
+  });
+  var theirTzObj = TIMEZONES.find(function (t) {
+    return t.value === theirTz;
+  });
   var myEffective = myTz + (myDst ? 1 : 0);
   var theirEffective = theirTz + (theirDst ? 1 : 0);
   var startMin = timeToMinutes(startTime);
@@ -220,82 +583,307 @@ function App() {
   var theirEnd = endMin + diff * 60;
   var theirStartDay = getDayLabel(theirStart);
   var theirEndDay = getDayLabel(theirEnd);
-  return React.createElement("div", {style:{minHeight:"100vh",background:"#0e0e0e",color:"#e8e0d0",fontFamily:"'Georgia', 'Times New Roman', serif",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}},
-    React.createElement("div", {style:{width:"100%",maxWidth:560}},
-      React.createElement("div", {style:{textAlign:"center",marginBottom:36}},
-        React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:4,color:"#c8a96e",textTransform:"uppercase",marginBottom:10}}, "◈ Timezone Bridge"),
-        React.createElement("h1", {style:{fontFamily:"'Playfair Display', serif",fontSize:34,fontWeight:400,margin:0,lineHeight:1.2,color:"#f0e8d8"}},
-          "Find the Right", React.createElement("br", null), React.createElement("em", null, "Meeting Hour")
-        )
-      ),
-      React.createElement("div", {className:"card", style:{marginBottom:12}},
-        React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:3,color:"#c8a96e",textTransform:"uppercase",marginBottom:14}}, "Your Timezone"),
-        React.createElement("select", {value:myTz, onChange:function(e){setMyTz(Number(e.target.value));setMyDst(false);}},
-          TIMEZONES.map(function(tz){return React.createElement("option",{key:tz.value,value:tz.value},tz.label)})
-        ),
-        myTzObj && myTzObj.dst && React.createElement(DSTToggle, {enabled:myDst,onChange:setMyDst,accent:"#c8a96e"}),
-        React.createElement("div", {style:{display:"flex",gap:12,marginTop:16}},
-          React.createElement("div", {style:{flex:1}},
-            React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:2,color:"#666",textTransform:"uppercase",marginBottom:6}}, "Available From"),
-            React.createElement("input", {type:"time",value:startTime,onChange:function(e){return setStartTime(e.target.value);}})
-          ),
-          React.createElement("div", {style:{flex:1}},
-            React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:2,color:"#666",textTransform:"uppercase",marginBottom:6}}, "Available Until"),
-            React.createElement("input", {type:"time",value:endTime,onChange:function(e){return setEndTime(e.target.value);}})
-          )
-        ),
-        React.createElement("div", {style:{marginTop:16}},
-          React.createElement(DraggableTimeBar, {startMin:startMin,endMin:endMin,onStartChange:setStartTime,onEndChange:setEndTime,label:"Your day — drag to adjust",accent:"#c8a96e"})
-        )
-      ),
-      React.createElement("div", {className:"card", style:{marginBottom:24}},
-        React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:3,color:"#7eb8c8",textTransform:"uppercase",marginBottom:14}}, "Their Timezone"),
-        React.createElement("select", {value:theirTz, onChange:function(e){setTheirTz(Number(e.target.value));setTheirDst(false);}},
-          TIMEZONES.map(function(tz){return React.createElement("option",{key:tz.value,value:tz.value},tz.label)})
-        ),
-        theirTzObj && theirTzObj.dst && React.createElement(DSTToggle, {enabled:theirDst,onChange:setTheirDst,accent:"#7eb8c8"}),
-        React.createElement("div", {style:{marginTop:16}},
-          React.createElement(DraggableTimeBar, {startMin:theirStart,endMin:theirEnd,
-            onStartChange:function(t){return setStartTime(minutesToTimeStr(timeToMinutes(t)-diff*60));},
-            onEndChange:function(t){return setEndTime(minutesToTimeStr(timeToMinutes(t)-diff*60));},
-            label:"Their day — drag to adjust",accent:"#7eb8c8"})
-        )
-      ),
-      React.createElement("div", {className:"result-card"},
-        React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:3,color:"#888",textTransform:"uppercase",marginBottom:20}}, "Conversion"),
-        React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}},
-          React.createElement("div", {style:{textAlign:"center",flex:1,minWidth:120}},
-            React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:2,color:"#c8a96e",textTransform:"uppercase",marginBottom:8}}, "You"),
-            React.createElement("div", {style:{fontFamily:"'Playfair Display', serif",fontSize:22,color:"#f0e8d8"}}, fmt(startMin)),
-            React.createElement("div", {style:{color:"#555",fontFamily:"'DM Mono', monospace",fontSize:10,marginTop:2}}, "to"),
-            React.createElement("div", {style:{fontFamily:"'Playfair Display', serif",fontSize:22,color:"#f0e8d8"}}, fmt(endMin))
-          ),
-          React.createElement("div", {style:{textAlign:"center",color:"#444",fontSize:20,padding:"0 4px"}}, "→"),
-          React.createElement("div", {style:{textAlign:"center",flex:1,minWidth:120}},
-            React.createElement("div", {style:{fontFamily:"'DM Mono', monospace",fontSize:10,letterSpacing:2,color:"#7eb8c8",textTransform:"uppercase",marginBottom:8}}, "Them"),
-            React.createElement("div", {style:{fontFamily:"'Playfair Display', serif",fontSize:22,color:"#f0e8d8"}},
-              fmt(theirStart),
-              theirStartDay && React.createElement("span", {className:"tag",style:{background:"#1e1e1e",color:"#7eb8c8"}}, theirStartDay)
-            ),
-            React.createElement("div", {style:{color:"#555",fontFamily:"'DM Mono', monospace",fontSize:10,marginTop:2}}, "to"),
-            React.createElement("div", {style:{fontFamily:"'Playfair Display', serif",fontSize:22,color:"#f0e8d8"}},
-              fmt(theirEnd),
-              theirEndDay && React.createElement("span", {className:"tag",style:{background:"#1e1e1e",color:"#7eb8c8"}}, theirEndDay)
-            )
-          )
-        ),
-        React.createElement("div", {style:{marginTop:20,padding:"14px 16px",background:"#0e0e0e",borderRadius:6,borderLeft:"3px solid ".concat(diff>=0?"#c8a96e":"#7eb8c8")}},
-          React.createElement("span", {style:{fontFamily:"'DM Mono', monospace",fontSize:11,color:"#666"}},
-            "Offset: ", diff>=0?"+":"", diff%1===0?diff:diff.toFixed(1), " hours", diff===0&&" · Same timezone"
-          )
-        )
-      ),
-      React.createElement("div", {style:{textAlign:"center",marginTop:24,fontFamily:"'DM Mono', monospace",fontSize:10,color:"#333",letterSpacing:2}}, "TIMEZONE BRIDGE · LOCAL TIME ONLY")
-    )
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: "#0e0e0e",
+      color: "#e8e0d0",
+      fontFamily: "'Georgia', 'Times New Roman', serif",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "24px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      maxWidth: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 36
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 4,
+      color: "#c8a96e",
+      textTransform: "uppercase",
+      marginBottom: 10
+    }
+  }, ""), /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 34,
+      fontWeight: 400,
+      margin: 0,
+      lineHeight: 1.2,
+      color: "#f0e8d8"
+    }
+  }, "Timezone Converter")), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 3,
+      color: "#c8a96e",
+      textTransform: "uppercase",
+      marginBottom: 14
+    }
+  }, "Your Timezone"), /*#__PURE__*/React.createElement("select", {
+    value: myTz,
+    onChange: function onChange(e) {
+      setMyTz(Number(e.target.value));
+      setMyDst(false);
+    }
+  }, TIMEZONES.map(function (tz) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: tz.value,
+      value: tz.value
+    }, tz.label);
+  })), myTzObj && myTzObj.dst && /*#__PURE__*/React.createElement(DSTToggle, {
+    enabled: myDst,
+    onChange: setMyDst,
+    accent: "#c8a96e"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12,
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 2,
+      color: "#666",
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "Available From"), /*#__PURE__*/React.createElement("input", {
+    type: "time",
+    value: startTime,
+    onChange: function onChange(e) {
+      return setStartTime(e.target.value);
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 2,
+      color: "#666",
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "Available Until"), /*#__PURE__*/React.createElement("input", {
+    type: "time",
+    value: endTime,
+    onChange: function onChange(e) {
+      return setEndTime(e.target.value);
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement(DraggableTimeBar, {
+    startMin: startMin,
+    endMin: endMin,
+    onStartChange: setStartTime,
+    onEndChange: setEndTime,
+    label: "Your day \u2014 drag to adjust",
+    accent: "#c8a96e"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 3,
+      color: "#7eb8c8",
+      textTransform: "uppercase",
+      marginBottom: 14
+    }
+  }, "Their Timezone"), /*#__PURE__*/React.createElement("select", {
+    value: theirTz,
+    onChange: function onChange(e) {
+      setTheirTz(Number(e.target.value));
+      setTheirDst(false);
+    }
+  }, TIMEZONES.map(function (tz) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: tz.value,
+      value: tz.value
+    }, tz.label);
+  })), theirTzObj && theirTzObj.dst && /*#__PURE__*/React.createElement(DSTToggle, {
+    enabled: theirDst,
+    onChange: setTheirDst,
+    accent: "#7eb8c8"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement(DraggableTimeBar, {
+    startMin: theirStart,
+    endMin: theirEnd,
+    onStartChange: function onStartChange(t) {
+      return setStartTime(minutesToTimeStr(timeToMinutes(t) - diff * 60));
+    },
+    onEndChange: function onEndChange(t) {
+      return setEndTime(minutesToTimeStr(timeToMinutes(t) - diff * 60));
+    },
+    label: "Their day \u2014 drag to adjust",
+    accent: "#7eb8c8"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "result-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 3,
+      color: "#888",
+      textTransform: "uppercase",
+      marginBottom: 20
+    }
+  }, "Conversion"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 2,
+      color: "#c8a96e",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, "You"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 22,
+      color: "#f0e8d8"
+    }
+  }, fmt(startMin)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#555",
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      marginTop: 2
+    }
+  }, "to"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 22,
+      color: "#f0e8d8"
+    }
+  }, fmt(endMin))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      color: "#444",
+      fontSize: 20,
+      padding: "0 4px"
+    }
+  }, "\u2192"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      letterSpacing: 2,
+      color: "#7eb8c8",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, "Them"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 22,
+      color: "#f0e8d8"
+    }
+  }, fmt(theirStart), theirStartDay && /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      background: "#1e1e1e",
+      color: "#7eb8c8"
+    }
+  }, theirStartDay)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#555",
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      marginTop: 2
+    }
+  }, "to"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 22,
+      color: "#f0e8d8"
+    }
+  }, fmt(theirEnd), theirEndDay && /*#__PURE__*/React.createElement("span", {
+    className: "tag",
+    style: {
+      background: "#1e1e1e",
+      color: "#7eb8c8"
+    }
+  }, theirEndDay)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      padding: "14px 16px",
+      background: "#0e0e0e",
+      borderRadius: 6,
+      borderLeft: "3px solid ".concat(diff >= 0 ? "#c8a96e" : "#7eb8c8")
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 11,
+      color: "#666"
+    }
+  }, "Offset: ", diff >= 0 ? "+" : "", diff % 1 === 0 ? diff : diff.toFixed(1), " hours", diff === 0 && " · Same timezone"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginTop: 24,
+      fontFamily: "'DM Mono', monospace",
+      fontSize: 10,
+      color: "#333",
+      letterSpacing: 2
+    }
+  }, "TIMEZONE BRIDGE \xB7 LOCAL TIME ONLY")));
 }
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(App, null));
+root.render(/*#__PURE__*/React.createElement(App, null));
+
   </script>
 </body>
 </html>
